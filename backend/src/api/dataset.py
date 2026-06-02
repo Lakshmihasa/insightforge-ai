@@ -8,6 +8,7 @@ from fastapi import Depends
 from fastapi import HTTPException
 from src.schemas.question_schema import QuestionRequest
 from src.services.gemini_service import ask_gemini
+import matplotlib.pyplot as plt
 
 from sqlalchemy.orm import Session
 
@@ -284,4 +285,49 @@ def ask_dataset(
 
     return {
         "answer": answer
+    }
+@router.get("/{dataset_id}/chart")
+def generate_chart(
+    dataset_id: int,
+    db: Session = Depends(get_db)
+):
+
+    dataset = db.query(Dataset).filter(
+        Dataset.id == dataset_id
+    ).first()
+
+    if not dataset:
+        raise HTTPException(
+            status_code=404,
+            detail="Dataset not found"
+        )
+
+    df = pd.read_csv(dataset.filepath)
+
+    numeric_cols = df.select_dtypes(
+        include=["number"]
+    ).columns
+
+    if len(numeric_cols) == 0:
+        raise HTTPException(
+            status_code=400,
+            detail="No numeric columns found"
+        )
+
+    column = numeric_cols[0]
+
+    plt.figure(figsize=(6, 4))
+    plt.hist(df[column])
+
+    chart_path = (
+        f"src/charts/dataset_{dataset_id}.png"
+    )
+
+    plt.savefig(chart_path)
+    plt.close()
+
+    return {
+        "chart_created": True,
+        "column": column,
+        "path": chart_path
     }
