@@ -9,6 +9,8 @@ from src.models.user import User
 from src.auth.dependencies import get_current_user
 from src.auth.roles import admin_required
 
+from src.schemas.user_response import UserResponse
+
 router = APIRouter(
     prefix="/users",
     tags=["Users"]
@@ -22,7 +24,7 @@ def get_profile(
     return current_user
 
 
-@router.get("/")
+@router.get("/", response_model=list[UserResponse])
 def get_all_users(
     db: Session = Depends(get_db),
     current_user=Depends(admin_required)
