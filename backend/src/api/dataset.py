@@ -6,6 +6,7 @@ from fastapi import UploadFile
 from fastapi import File
 from fastapi import Depends
 from fastapi import HTTPException
+from src.schemas.question_schema import QuestionRequest
 
 from sqlalchemy.orm import Session
 
@@ -112,4 +113,176 @@ def dataset_summary(
             col: str(dtype)
             for col, dtype in df.dtypes.items()
         }
+    }
+@router.get("/{dataset_id}/statistics")
+def dataset_statistics(
+    dataset_id: int,
+    db: Session = Depends(get_db)
+):
+
+    dataset = db.query(Dataset).filter(
+        Dataset.id == dataset_id
+    ).first()
+
+    if not dataset:
+        raise HTTPException(
+            status_code=404,
+            detail="Dataset not found"
+        )
+
+    df = pd.read_csv(dataset.filepath)
+
+    numeric_df = df.select_dtypes(
+        include=["number"]
+    )
+
+    stats = {}
+
+    for column in numeric_df.columns:
+
+        stats[column] = {
+            "mean": float(numeric_df[column].mean()),
+            "median": float(numeric_df[column].median()),
+            "min": float(numeric_df[column].min()),
+            "max": float(numeric_df[column].max()),
+            "std": float(numeric_df[column].std())
+        }
+
+    return {
+        "dataset_id": dataset.id,
+        "filename": dataset.filename,
+        "statistics": stats
+    }
+@router.get("/{dataset_id}/quality")
+def dataset_quality(
+    dataset_id: int,
+    db: Session = Depends(get_db)
+):
+
+    dataset = db.query(Dataset).filter(
+        Dataset.id == dataset_id
+    ).first()
+
+    if not dataset:
+        raise HTTPException(
+            status_code=404,
+            detail="Dataset not found"
+        )
+
+    df = pd.read_csv(dataset.filepath)
+
+    total_cells = df.shape[0] * df.shape[1]
+
+    missing_cells = df.isnull().sum().sum()
+
+    quality_score = (
+        (total_cells - missing_cells)
+        / total_cells
+    ) * 100
+
+    return {
+        "dataset_id": dataset.id,
+        "filename": dataset.filename,
+        "rows": len(df),
+        "columns": len(df.columns),
+        "missing_cells": int(missing_cells),
+        "quality_score": round(
+            quality_score,
+            2
+        )
+    }
+@router.get("/{dataset_id}/insights")
+def dataset_insights(
+    dataset_id: int,
+    db: Session = Depends(get_db)
+):
+
+    dataset = db.query(Dataset).filter(
+        Dataset.id == dataset_id
+    ).first()
+
+    if not dataset:
+        raise HTTPException(
+            status_code=404,
+            detail="Dataset not found"
+        )
+
+    df = pd.read_csv(dataset.filepath)
+
+    insights = []
+
+    # Missing values insight
+    missing_values = df.isnull().sum().sum()
+
+    if missing_values == 0:
+        insights.append(
+            "Dataset contains no missing values."
+        )
+    else:
+        insights.append(
+            f"Dataset contains {missing_values} missing values."
+        )
+
+    # Numeric column insights
+    numeric_df = df.select_dtypes(
+        include=["number"]
+    )
+
+    for column in numeric_df.columns:
+
+        insights.append(
+            f"{column}: average = {round(numeric_df[column].mean(), 2)}"
+        )
+
+        insights.append(
+            f"{column}: minimum = {numeric_df[column].min()}"
+        )
+
+        insights.append(
+            f"{column}: maximum = {numeric_df[column].max()}"
+        )
+
+    return {
+        "dataset_id": dataset.id,
+        "filename": dataset.filename,
+        "insights": insights
+    }
+@router.post("/{dataset_id}/ask")
+def ask_dataset(
+    dataset_id: int,
+    request: QuestionRequest,
+    db: Session = Depends(get_db)
+):
+
+    dataset = db.query(Dataset).filter(
+        Dataset.id == dataset_id
+    ).first()
+
+    if not dataset:
+        raise HTTPException(
+            status_code=404,
+            detail="Dataset not found"
+        )
+
+    df = pd.read_csv(dataset.filepath)
+
+    question = request.question.lower()
+
+    if "average salary" in question:
+        return {
+            "answer": f"The average salary is {df['salary'].mean():.2f}"
+        }
+
+    if "maximum salary" in question:
+        return {
+            "answer": f"The maximum salary is {df['salary'].max()}"
+        }
+
+    if "minimum salary" in question:
+        return {
+            "answer": f"The minimum salary is {df['salary'].min()}"
+        }
+
+    return {
+        "answer": "Question not supported yet."
     }
