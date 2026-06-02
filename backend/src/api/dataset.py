@@ -7,6 +7,7 @@ from fastapi import File
 from fastapi import Depends
 from fastapi import HTTPException
 from src.schemas.question_schema import QuestionRequest
+from src.services.gemini_service import ask_gemini
 
 from sqlalchemy.orm import Session
 
@@ -266,23 +267,21 @@ def ask_dataset(
 
     df = pd.read_csv(dataset.filepath)
 
-    question = request.question.lower()
+    prompt = f"""
+    Dataset Columns:
+    {list(df.columns)}
 
-    if "average salary" in question:
-        return {
-            "answer": f"The average salary is {df['salary'].mean():.2f}"
-        }
+    First Rows:
+    {df.head().to_string()}
 
-    if "maximum salary" in question:
-        return {
-            "answer": f"The maximum salary is {df['salary'].max()}"
-        }
+    User Question:
+    {request.question}
 
-    if "minimum salary" in question:
-        return {
-            "answer": f"The minimum salary is {df['salary'].min()}"
-        }
+    Answer based only on this dataset.
+    """
+
+    answer = ask_gemini(prompt)
 
     return {
-        "answer": "Question not supported yet."
+        "answer": answer
     }

@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     APP_VERSION: str
     DATABASE_URL: str
     DEBUG: bool
+    GEMINI_API_KEY: str
 
     SECRET_KEY: str
     ALGORITHM: str
