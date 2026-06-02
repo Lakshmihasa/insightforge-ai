@@ -7,7 +7,7 @@ from src.api.users import router as users_router
 
 from src.database.base import Base
 from src.database.database import engine
-
+# Base.metadata.create_all(bind=engine)
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
