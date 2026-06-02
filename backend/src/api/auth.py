@@ -1,6 +1,3 @@
-from src.schemas.user_schema import UserLogin
-from src.auth.password import verify_password
-from src.auth.jwt_handler import create_access_token
 from fastapi import APIRouter
 from fastapi import Depends
 from fastapi import HTTPException
@@ -8,9 +5,18 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from src.database.session import get_db
+
 from src.models.user import User
+
 from src.schemas.user_schema import UserRegister
+from src.schemas.user_schema import UserLogin
+
 from src.auth.password import hash_password
+from src.auth.password import verify_password
+
+from src.auth.jwt_handler import create_access_token
+from src.auth.dependencies import get_current_user
+
 
 router = APIRouter(
     prefix="/auth",
@@ -55,6 +61,8 @@ def register_user(
         "message": "User registered successfully",
         "user_id": new_user.id
     }
+
+
 @router.post("/login")
 def login_user(
     user: UserLogin,
@@ -91,3 +99,10 @@ def login_user(
         "access_token": token,
         "token_type": "bearer"
     }
+
+
+@router.get("/me")
+def get_me(
+    current_user=Depends(get_current_user)
+):
+    return current_user
