@@ -1,6 +1,20 @@
-venv/
+# Environment
 .env
+*.env
+
+# Virtual Environment
+venv/
+.venv/
+
+# Python Cache
 __pycache__/
 *.pyc
+
+# Uploads
+uploads/
+
+# Charts
+src/charts/
+
+# VS Code
 .vscode/
-.idea/
