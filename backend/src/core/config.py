@@ -17,3 +17,7 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+settings = Settings()
+
+print("DATABASE_URL =", settings.DATABASE_URL)

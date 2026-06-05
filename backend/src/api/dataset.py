@@ -9,6 +9,8 @@ from fastapi import HTTPException
 from src.schemas.question_schema import QuestionRequest
 from src.services.gemini_service import ask_gemini
 import matplotlib.pyplot as plt
+from fastapi.responses import FileResponse
+import matplotlib.pyplot as plt
 
 from sqlalchemy.orm import Session
 
@@ -211,7 +213,43 @@ def dataset_insights(
 
     df = pd.read_csv(dataset.filepath)
 
-    insights = []
+    prompt = f"""
+You are an expert data analyst.
+
+Dataset Name:
+{dataset.filename}
+
+Rows:
+{len(df)}
+
+Columns:
+{len(df.columns)}
+
+Column Names:
+{list(df.columns)}
+
+Sample Data:
+{df.head(20).to_string()}
+
+Provide:
+1. Key trends
+2. Important observations
+3. Data quality analysis
+4. Business insights
+5. Recommendations
+
+Return concise bullet points.
+"""
+
+    ai_insights = ask_gemini(prompt)
+
+    return {
+        "dataset_id": dataset.id,
+        "filename": dataset.filename,
+        "rows": len(df),
+        "columns": len(df.columns),
+        "ai_insights": ai_insights
+    }
 
     # Missing values insight
     missing_values = df.isnull().sum().sum()
@@ -286,6 +324,62 @@ def ask_dataset(
     return {
         "answer": answer
     }
+@router.post("/upload")
+async def upload_dataset(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+
+    upload_dir = os.path.abspath(
+        "src/uploads"
+    )
+
+    os.makedirs(
+        upload_dir,
+        exist_ok=True
+    )
+
+    file_path = os.path.join(
+        upload_dir,
+        file.filename
+    )
+
+    with open(
+        file_path,
+        "wb"
+    ) as buffer:
+
+        buffer.write(
+            await file.read()
+        )
+
+    # Convert Windows paths to Docker/Linux paths
+    file_path = file_path.replace(
+        "\\",
+        "/"
+    )
+
+    df = pd.read_csv(file_path)
+
+    dataset = Dataset(
+        filename=file.filename,
+        filepath=file_path,
+        rows=len(df),
+        columns=len(df.columns)
+    )
+
+    db.add(dataset)
+    db.commit()
+    db.refresh(dataset)
+
+    return {
+        "dataset_id": dataset.id,
+        "filename": file.filename,
+        "filepath": file_path,
+        "rows": len(df),
+        "columns": len(df.columns),
+        "column_names": list(df.columns)
+    }
 @router.get("/{dataset_id}/chart")
 def generate_chart(
     dataset_id: int,
@@ -304,30 +398,93 @@ def generate_chart(
 
     df = pd.read_csv(dataset.filepath)
 
-    numeric_cols = df.select_dtypes(
+    numeric_columns = df.select_dtypes(
         include=["number"]
     ).columns
 
-    if len(numeric_cols) == 0:
+    if len(numeric_columns) == 0:
         raise HTTPException(
             status_code=400,
             detail="No numeric columns found"
         )
 
-    column = numeric_cols[0]
+    column = numeric_columns[0]
 
-    plt.figure(figsize=(6, 4))
-    plt.hist(df[column])
+    os.makedirs(
+        "src/charts",
+        exist_ok=True
+    )
 
     chart_path = (
-        f"src/charts/dataset_{dataset_id}.png"
+        f"src/charts/chart_{dataset_id}.png"
+    )
+
+    plt.figure(figsize=(8, 5))
+
+    df[column].hist()
+
+    plt.title(f"{column} Distribution")
+
+    plt.xlabel(column)
+
+    plt.ylabel("Frequency")
+
+    plt.savefig(chart_path)
+
+    plt.close()
+
+    return FileResponse(
+        chart_path,
+        media_type="image/png"
+    )
+@router.get("/{dataset_id}/chart")
+def generate_chart(
+    dataset_id: int,
+    db: Session = Depends(get_db)
+):
+
+    dataset = db.query(Dataset).filter(
+        Dataset.id == dataset_id
+    ).first()
+
+    if not dataset:
+        raise HTTPException(
+            status_code=404,
+            detail="Dataset not found"
+        )
+
+    df = pd.read_csv(dataset.filepath)
+
+    numeric_columns = df.select_dtypes(
+        include=["number"]
+    ).columns
+
+    if len(numeric_columns) == 0:
+        raise HTTPException(
+            status_code=400,
+            detail="No numeric columns found"
+        )
+
+    column = numeric_columns[0]
+
+    os.makedirs(
+        "src/charts",
+        exist_ok=True
+    )
+
+    plt.figure(figsize=(6, 4))
+
+    df[column].hist()
+
+    chart_path = (
+        f"src/charts/chart_{dataset_id}.png"
     )
 
     plt.savefig(chart_path)
+
     plt.close()
 
     return {
-        "chart_created": True,
-        "column": column,
-        "path": chart_path
+        "chart_url":
+        f"http://127.0.0.1:8000/charts/chart_{dataset_id}.png"
     }
