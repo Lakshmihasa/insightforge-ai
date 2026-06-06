@@ -5,6 +5,10 @@ from fastapi.staticfiles import StaticFiles
 from src.api.auth import router as auth_router
 from src.api.users import router as user_router
 from src.api.dataset import router as dataset_router
+from src.database.database import engine
+from src.database.base import Base
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="InsightForge AI"
