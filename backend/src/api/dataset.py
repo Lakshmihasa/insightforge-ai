@@ -1,21 +1,21 @@
 import os
 import pandas as pd
+import matplotlib.pyplot as plt
 
 from fastapi import APIRouter
 from fastapi import UploadFile
 from fastapi import File
 from fastapi import Depends
 from fastapi import HTTPException
-from src.schemas.question_schema import QuestionRequest
-from src.services.gemini_service import ask_gemini
-import matplotlib.pyplot as plt
+
 from fastapi.responses import FileResponse
-import matplotlib.pyplot as plt
 
 from sqlalchemy.orm import Session
 
 from src.database.session import get_db
 from src.models.dataset import Dataset
+from src.schemas.question_schema import QuestionRequest
+
 
 router = APIRouter(
     prefix="/datasets",
@@ -25,7 +25,6 @@ router = APIRouter(
 
 @router.get("/test")
 def dataset_test():
-
     return {
         "message": "Dataset API working"
     }
@@ -58,6 +57,11 @@ async def upload_dataset(
             await file.read()
         )
 
+    file_path = file_path.replace(
+        "\\",
+        "/"
+    )
+
     df = pd.read_csv(file_path)
 
     dataset = Dataset(
@@ -74,6 +78,7 @@ async def upload_dataset(
     return {
         "dataset_id": dataset.id,
         "filename": file.filename,
+        "filepath": file_path,
         "rows": len(df),
         "columns": len(df.columns),
         "column_names": list(df.columns)
@@ -88,6 +93,8 @@ def get_datasets(
     datasets = db.query(Dataset).all()
 
     return datasets
+
+
 @router.get("/{dataset_id}/summary")
 def dataset_summary(
     dataset_id: int,
@@ -118,6 +125,8 @@ def dataset_summary(
             for col, dtype in df.dtypes.items()
         }
     }
+
+
 @router.get("/{dataset_id}/statistics")
 def dataset_statistics(
     dataset_id: int,
@@ -157,6 +166,8 @@ def dataset_statistics(
         "filename": dataset.filename,
         "statistics": stats
     }
+
+
 @router.get("/{dataset_id}/quality")
 def dataset_quality(
     dataset_id: int,
@@ -195,6 +206,8 @@ def dataset_quality(
             2
         )
     }
+
+
 @router.get("/{dataset_id}/insights")
 def dataset_insights(
     dataset_id: int,
@@ -213,45 +226,8 @@ def dataset_insights(
 
     df = pd.read_csv(dataset.filepath)
 
-    prompt = f"""
-You are an expert data analyst.
+    insights = []
 
-Dataset Name:
-{dataset.filename}
-
-Rows:
-{len(df)}
-
-Columns:
-{len(df.columns)}
-
-Column Names:
-{list(df.columns)}
-
-Sample Data:
-{df.head(20).to_string()}
-
-Provide:
-1. Key trends
-2. Important observations
-3. Data quality analysis
-4. Business insights
-5. Recommendations
-
-Return concise bullet points.
-"""
-
-    ai_insights = ask_gemini(prompt)
-
-    return {
-        "dataset_id": dataset.id,
-        "filename": dataset.filename,
-        "rows": len(df),
-        "columns": len(df.columns),
-        "ai_insights": ai_insights
-    }
-
-    # Missing values insight
     missing_values = df.isnull().sum().sum()
 
     if missing_values == 0:
@@ -263,7 +239,6 @@ Return concise bullet points.
             f"Dataset contains {missing_values} missing values."
         )
 
-    # Numeric column insights
     numeric_df = df.select_dtypes(
         include=["number"]
     )
@@ -285,8 +260,12 @@ Return concise bullet points.
     return {
         "dataset_id": dataset.id,
         "filename": dataset.filename,
+        "rows": len(df),
+        "columns": len(df.columns),
         "insights": insights
     }
+
+
 @router.post("/{dataset_id}/ask")
 def ask_dataset(
     dataset_id: int,
@@ -294,92 +273,14 @@ def ask_dataset(
     db: Session = Depends(get_db)
 ):
 
-    dataset = db.query(Dataset).filter(
-        Dataset.id == dataset_id
-    ).first()
-
-    if not dataset:
-        raise HTTPException(
-            status_code=404,
-            detail="Dataset not found"
-        )
-
-    df = pd.read_csv(dataset.filepath)
-
-    prompt = f"""
-    Dataset Columns:
-    {list(df.columns)}
-
-    First Rows:
-    {df.head().to_string()}
-
-    User Question:
-    {request.question}
-
-    Answer based only on this dataset.
-    """
-
-    answer = ask_gemini(prompt)
-
     return {
-        "answer": answer
-    }
-@router.post("/upload")
-async def upload_dataset(
-    file: UploadFile = File(...),
-    db: Session = Depends(get_db)
-):
-
-    upload_dir = os.path.abspath(
-        "src/uploads"
-    )
-
-    os.makedirs(
-        upload_dir,
-        exist_ok=True
-    )
-
-    file_path = os.path.join(
-        upload_dir,
-        file.filename
-    )
-
-    with open(
-        file_path,
-        "wb"
-    ) as buffer:
-
-        buffer.write(
-            await file.read()
+        "answer": (
+            "AI chat is temporarily disabled. "
+            "Use Summary, Statistics, Quality and Insights endpoints."
         )
-
-    # Convert Windows paths to Docker/Linux paths
-    file_path = file_path.replace(
-        "\\",
-        "/"
-    )
-
-    df = pd.read_csv(file_path)
-
-    dataset = Dataset(
-        filename=file.filename,
-        filepath=file_path,
-        rows=len(df),
-        columns=len(df.columns)
-    )
-
-    db.add(dataset)
-    db.commit()
-    db.refresh(dataset)
-
-    return {
-        "dataset_id": dataset.id,
-        "filename": file.filename,
-        "filepath": file_path,
-        "rows": len(df),
-        "columns": len(df.columns),
-        "column_names": list(df.columns)
     }
+
+
 @router.get("/{dataset_id}/chart")
 def generate_chart(
     dataset_id: int,
@@ -423,11 +324,9 @@ def generate_chart(
 
     df[column].hist()
 
-    plt.title(f"{column} Distribution")
-
-    plt.xlabel(column)
-
-    plt.ylabel("Frequency")
+    plt.title(
+        f"{column} Distribution"
+    )
 
     plt.savefig(chart_path)
 
@@ -437,8 +336,10 @@ def generate_chart(
         chart_path,
         media_type="image/png"
     )
-@router.get("/{dataset_id}/chart")
-def generate_chart(
+
+
+@router.get("/{dataset_id}/report")
+def download_report(
     dataset_id: int,
     db: Session = Depends(get_db)
 ):
@@ -455,36 +356,40 @@ def generate_chart(
 
     df = pd.read_csv(dataset.filepath)
 
-    numeric_columns = df.select_dtypes(
-        include=["number"]
-    ).columns
+    report = f"""
+Dataset Report
+==============
 
-    if len(numeric_columns) == 0:
-        raise HTTPException(
-            status_code=400,
-            detail="No numeric columns found"
-        )
+Filename : {dataset.filename}
+Rows     : {len(df)}
+Columns  : {len(df.columns)}
 
-    column = numeric_columns[0]
+Column Names:
+{chr(10).join(f"  - {col}" for col in df.columns)}
+
+Data Types:
+{chr(10).join(f"  {col}: {dtype}" for col, dtype in df.dtypes.items())}
+
+Missing Values:
+{chr(10).join(f"  {col}: {count}" for col, count in df.isnull().sum().items())}
+
+Statistics (Numeric Columns):
+{df.describe().to_string()}
+"""
 
     os.makedirs(
-        "src/charts",
+        "src/reports",
         exist_ok=True
     )
 
-    plt.figure(figsize=(6, 4))
-
-    df[column].hist()
-
-    chart_path = (
-        f"src/charts/chart_{dataset_id}.png"
+    report_path = (
+        f"src/reports/report_{dataset_id}.txt"
     )
 
-    plt.savefig(chart_path)
+    with open(report_path, "w") as f:
+        f.write(report)
 
-    plt.close()
-
-    return {
-        "chart_url":
-        f"http://127.0.0.1:8000/charts/chart_{dataset_id}.png"
-    }
+    return FileResponse(
+        report_path,
+        filename=f"report_{dataset_id}.txt"
+    )

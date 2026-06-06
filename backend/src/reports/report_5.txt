@@ -1,0 +1,33 @@
+
+Dataset Report
+==============
+
+Filename : sample.csv
+Rows     : 3
+Columns  : 3
+
+Column Names:
+  - name
+  - age
+  - salary
+
+Data Types:
+  name: object
+  age: int64
+  salary: int64
+
+Missing Values:
+  name: 0
+  age: 0
+  salary: 0
+
+Statistics (Numeric Columns):
+             age   salary
+count   3.000000      3.0
+mean   25.666667  60000.0
+std     4.041452  10000.0
+min    22.000000  50000.0
+25%    23.500000  55000.0
+50%    25.000000  60000.0
+75%    27.500000  65000.0
+max    30.000000  70000.0
