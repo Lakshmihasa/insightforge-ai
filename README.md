@@ -1,5 +1,5 @@
 ⚡ InsightForge AI
-<img width="1847" height="797" alt="image" src="https://github.com/user-attachments/assets/b29c10c6-0050-4906-a3c4-9d8e8c7e078e" />
+https://insightforge-45e6dxux6-lakshmi-hasa-s-projects.vercel.app/
 
 
 AI-powered dataset analytics platform — upload a CSV, get instant statistics, quality scores, visualizations, and natural language insights.
