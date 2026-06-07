@@ -52,7 +52,7 @@ python >= 3.11
 postgresql >= 14
 
 1. Clone the repo
-bashgit clone https://github.com/your-username/insightforge-ai.git
+bashgit clone https://github.com/lakshmihasa/insightforge-ai.git
 cd insightforge-ai
 
 3. Backend setup
@@ -61,7 +61,7 @@ python -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 Create .env:
-envDATABASE_URL=postgresql://user:password@localhost:5432/insightforge
+envDATABASE_URL=postgresql://user:Hasa@22062003@localhost:5432/insightforge
 Run migrations and start:
 bashalembic upgrade head
 uvicorn src.main:app --reload
