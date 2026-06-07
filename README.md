@@ -40,7 +40,7 @@ Pydantic — Request/response validation
 Infrastructure
 
 Vercel — Frontend deployment (CI/CD on push)
-Railway — Backend + PostgreSQL hosting
+render — Backend + PostgreSQL hosting
 PostgreSQL — Persistent dataset metadata storage
 
 
@@ -143,11 +143,11 @@ git push origin feature/your-feature
 
 📄 License
 
-MIT © 2025 — Built with precision by Your Name
+MIT © 2025 — Built with precision by Lakshmi hasa Ponduru
 
 <div align="center">
     
-FastAPI · PostgreSQL · Next.js · InsightCore · Vercel · Railway
+FastAPI · PostgreSQL · Next.js · InsightCore · Vercel · Render
 If this helped you, consider giving it a ⭐
 
 </div>
