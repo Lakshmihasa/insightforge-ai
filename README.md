@@ -2,10 +2,16 @@
 
 AI-powered dataset analytics platform — upload a CSV, get instant statistics, quality scores, visualizations, and natural language insights.
 
-<img width="1828" height="727" alt="image" src="https://github.com/user-attachments/assets/f035f091-4463-4f88-be30-9d6b2f2beb66" />
-<img width="1848" height="833" alt="image" src="https://github.com/user-attachments/assets/192e7783-0417-4dbe-9f3d-4e10147c68b5" />
-
-
+<div align="center">
+Show Image
+Show Image
+Show Image
+Show Image
+Show Image
+Show Image
+Show Image
+Show Image
+</div>
 
 🎯 What is InsightForge AI?
 InsightForge AI turns raw CSV files into instant, actionable intelligence — no data science background required. Upload a dataset and get a full analytics suite in seconds.
@@ -107,6 +113,8 @@ This approach ensures:
 ✅ No rate limits
 
 
+📸 Screenshots
+
 Upload a CSV → instant analytics dashboard
 
 Upload & SearchStatistics CardsQuality Score(screenshot)(screenshot)(screenshot)
@@ -136,3 +144,4 @@ MIT © 2025 — Built with precision by Your Name
 <div align="center">
 FastAPI · PostgreSQL · Next.js · InsightCore · Vercel · Railway
 If this helped you, consider giving it a ⭐
+</div>
