@@ -193,13 +193,23 @@ This approach ensures:
 ## 📸 Screenshots
 
 > Upload a CSV → instant analytics dashboard
+>
+> | UI of InsightForge AI |
+>
+> | <img width="1841" height="712" alt="Screenshot 2026-06-07 100859" src="https://github.com/user-attachments/assets/be66425d-1b7b-4aa0-8b5a-44659f9fd59e" />
 
-| Upload & Search | Statistics Cards | Quality Score |
-|---|---|---|
-| <img width="1841" height="712" alt="Screenshot 2026-06-07 100859" src="https://github.com/user-attachments/assets/be66425d-1b7b-4aa0-8b5a-44659f9fd59e" />
+| Upload & Search |
+
+<img width="427" height="458" alt="image" src="https://github.com/user-attachments/assets/e8632209-644f-4654-9bda-9010eb493970" />
+
+| Statistics Cards |
+
  | <img width="646" height="412" alt="image" src="https://github.com/user-attachments/assets/4cf2173a-43f7-499b-9a0a-318ad587fb24" />
+ 
+ | Quality Score |
+ 
  | <img width="1727" height="413" alt="image" src="https://github.com/user-attachments/assets/69fef896-2b24-449c-8fd5-516e1945bef9" />
- |
+ 
 
 ---
 
