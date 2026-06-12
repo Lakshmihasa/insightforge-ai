@@ -1,5 +1,7 @@
 # ⚡ InsightForge AI
 
+https://insightforge-ai-ochre.vercel.app/
+
 > **AI-powered dataset analytics platform** — upload a CSV, get instant statistics, quality scores, visualizations, and natural language insights.
 
 <div align="center">
@@ -78,7 +80,7 @@ postgresql >= 14
 
 ### 1. Clone the repo
 ```bash
-git clone https://github.com/your-username/insightforge-ai.git
+git clone https://github.com/Lakshmihasa/insightforge-ai.git
 cd insightforge-ai
 ```
 
@@ -92,7 +94,7 @@ pip install -r requirements.txt
 
 Create `.env`:
 ```env
-DATABASE_URL=postgresql://user:password@localhost:5432/insightforge
+DATABASE_URL=postgresql://user:Hasa@22062003@localhost:5432/insightforge
 ```
 
 Run migrations and start:
@@ -194,36 +196,13 @@ This approach ensures:
 
 | Upload & Search | Statistics Cards | Quality Score |
 |---|---|---|
-| *(screenshot)* | *(screenshot)* | *(screenshot)* |
+| <img width="1841" height="712" alt="Screenshot 2026-06-07 100859" src="https://github.com/user-attachments/assets/be66425d-1b7b-4aa0-8b5a-44659f9fd59e" />
+ | <img width="646" height="412" alt="image" src="https://github.com/user-attachments/assets/4cf2173a-43f7-499b-9a0a-318ad587fb24" />
+ | <img width="1727" height="413" alt="image" src="https://github.com/user-attachments/assets/69fef896-2b24-449c-8fd5-516e1945bef9" />
+ |
 
 ---
 
-## 🌐 Deployment
-
-### Frontend → Vercel
-```bash
-# Auto-deploys on every git push to main
-git push origin main
-```
-
-Set environment variable in Vercel dashboard:
-```
-NEXT_PUBLIC_API_URL = https://your-backend.up.railway.app
-```
-
-### Backend → Railway
-```bash
-railway login
-railway init
-railway up
-```
-
-Add environment variable in Railway dashboard:
-```
-DATABASE_URL = postgresql://...  # Railway provides this automatically
-```
-
----
 
 ## 🤝 Contributing
 
@@ -239,13 +218,13 @@ git push origin feature/your-feature
 
 ## 📄 License
 
-MIT © 2025 — Built with precision by [Your Name](https://github.com/your-username)
+MIT © 2025 — Built with precision by [Lakshmi Hasa](https://github.com/Lakshmihasa)
 
 ---
 
 <div align="center">
 
-**FastAPI · PostgreSQL · Next.js · InsightCore · Vercel · Railway**
+**FastAPI · PostgreSQL · Next.js · InsightCore · Vercel · Render**
 
 *If this helped you, consider giving it a ⭐*
 
