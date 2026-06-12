@@ -64,7 +64,7 @@ Built as a **full-stack portfolio project** demonstrating production-grade archi
 
 ### Infrastructure
 - **Vercel** — Frontend deployment (CI/CD on push)
-- **Railway** — Backend + PostgreSQL hosting
+- **Render** — Backend + PostgreSQL hosting
 - **PostgreSQL** — Persistent dataset metadata storage
 
 ---
